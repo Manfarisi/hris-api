@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             PositionSeeder::class,
             LeaveTypeSeeder::class,
             OfficeLocationSeeder::class,
+            PayrollComponentSeeder::class,
             UserSeeder::class,
         ]);
     }

@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\LeaveBalanceController;
 use App\Http\Controllers\Api\LeaveRequestController;
 use App\Http\Controllers\Api\LeaveTypeController;
+use App\Http\Controllers\Api\PayrollComponentController;
+use App\Http\Controllers\Api\PayrollController;
 use App\Http\Controllers\Api\PositionController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +26,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:hr,super_admin')->group(function () {
         Route::apiResource('departments', DepartmentController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('positions', PositionController::class)->only(['store', 'update', 'destroy']);
+
+        // Komponen gaji (tunjangan & potongan): hanya HR
+        Route::apiResource('payroll-components', PayrollComponentController::class)
+            ->parameters(['payroll-components' => 'payrollComponent'])
+            ->except(['show']);
     });
 
     // Karyawan: izin per aksi dicek lewat EmployeePolicy
@@ -60,4 +67,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{leaveRequest}/reject', [LeaveRequestController::class, 'reject']);
         Route::post('/{leaveRequest}/cancel', [LeaveRequestController::class, 'cancel']);
     });
+
+    // Payroll
+    Route::get('/payrolls/mine', [PayrollController::class, 'mine']);
+
+    Route::middleware('role:hr,super_admin')->prefix('payrolls')->group(function () {
+        Route::get('/', [PayrollController::class, 'index']);
+        Route::get('/export', [PayrollController::class, 'export']);
+        Route::post('/generate', [PayrollController::class, 'generate']);
+        Route::post('/finalize', [PayrollController::class, 'finalize']);
+        Route::delete('/{payroll}', [PayrollController::class, 'destroy'])->whereNumber('payroll');
+    });
+
+    // Lihat detail & PDF: HR (semua) atau pemilik slip yang sudah final (dicek PayrollPolicy)
+    Route::get('/payrolls/{payroll}', [PayrollController::class, 'show'])->whereNumber('payroll');
+    Route::get('/payrolls/{payroll}/pdf', [PayrollController::class, 'pdf'])->whereNumber('payroll');
 });
