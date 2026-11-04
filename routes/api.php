@@ -5,6 +5,9 @@ use App\Http\Controllers\Api\AttendanceReportController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\EmployeeController;
+use App\Http\Controllers\Api\LeaveBalanceController;
+use App\Http\Controllers\Api\LeaveRequestController;
+use App\Http\Controllers\Api\LeaveTypeController;
 use App\Http\Controllers\Api\PositionController;
 use Illuminate\Support\Facades\Route;
 
@@ -38,5 +41,23 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:hr,super_admin,manager')->prefix('attendances')->group(function () {
         Route::get('/', [AttendanceReportController::class, 'index']);
         Route::get('/recap', [AttendanceReportController::class, 'recap']);
+    });
+
+    // Cuti
+    Route::get('/leave-types', [LeaveTypeController::class, 'index']);
+    Route::get('/leave-balances/me', [LeaveBalanceController::class, 'me']);
+
+    Route::prefix('leave-requests')->group(function () {
+        // '/mine' harus didaftarkan SEBELUM '/{leaveRequest}' supaya tidak dianggap sebagai ID
+        Route::get('/mine', [LeaveRequestController::class, 'mine']);
+        Route::post('/', [LeaveRequestController::class, 'store'])->middleware('throttle:10,1');
+
+        Route::get('/', [LeaveRequestController::class, 'index'])
+            ->middleware('role:hr,super_admin,manager');
+
+        Route::get('/{leaveRequest}', [LeaveRequestController::class, 'show']);
+        Route::post('/{leaveRequest}/approve', [LeaveRequestController::class, 'approve']);
+        Route::post('/{leaveRequest}/reject', [LeaveRequestController::class, 'reject']);
+        Route::post('/{leaveRequest}/cancel', [LeaveRequestController::class, 'cancel']);
     });
 });
