@@ -11,6 +11,14 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    /**
+     * Login
+     *
+     * Menukar email dan password dengan token Sanctum. Kirim token itu di header
+     * `Authorization: Bearer <token>` untuk semua endpoint lain. Dibatasi 5 percobaan per menit.
+     *
+     * @unauthenticated
+     */
     public function login(Request $request): JsonResponse
     {
         $credentials = $request->validate([
@@ -44,6 +52,11 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Logout
+     *
+     * Mencabut token yang sedang dipakai.
+     */
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
@@ -53,6 +66,11 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Profil saya
+     *
+     * Data akun yang sedang login beserta data karyawannya.
+     */
     public function me(Request $request): JsonResponse
     {
         return response()->json([
