@@ -13,9 +13,12 @@ class ClockRequest extends FormRequest
 
     public function rules(): array
     {
+        // Koordinat hanya wajib kalau validasi lokasi sedang aktif
+        $presence = config('hris.attendance.require_location') ? 'required' : 'nullable';
+
         return [
-            'latitude' => ['required', 'numeric', 'between:-90,90'],
-            'longitude' => ['required', 'numeric', 'between:-180,180'],
+            'latitude' => [$presence, 'numeric', 'between:-90,90'],
+            'longitude' => [$presence, 'numeric', 'between:-180,180'],
         ];
     }
 }

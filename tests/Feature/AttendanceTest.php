@@ -28,6 +28,7 @@ class AttendanceTest extends TestCase
             'hris.work_end' => '17:00',
             'hris.late_tolerance_minutes' => 0,
             'hris.work_days' => [1, 2, 3, 4, 5],
+            'hris.attendance.require_location' => true,
         ]);
 
         $this->seed();

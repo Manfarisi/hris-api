@@ -13,6 +13,12 @@ return [
     // Hari kerja (ISO): 1 = Senin ... 7 = Minggu
     'work_days' => [1, 2, 3, 4, 5],
 
+    'attendance' => [
+        // true  = clock in/out hanya sah di dalam radius kantor (koordinat wajib dikirim)
+        // false = hanya jam yang dicatat, koordinat tidak diminta dan tidak disimpan
+        'require_location' => (bool) env('HRIS_REQUIRE_LOCATION', false),
+    ],
+
     'payroll' => [
         // Upah per jam lembur = gaji pokok / pembagi ini
         'overtime_divisor' => 173,

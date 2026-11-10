@@ -32,6 +32,7 @@ class AttendanceController extends Controller
             'data' => $attendance ? new AttendanceResource($attendance) : null,
             'server_time' => $now->toIso8601String(),
             'is_working_day' => $this->isWorkingDay($now),
+            'location_required' => $this->requiresLocation(),
             'work_hours' => [
                 'start' => config('hris.work_start'),
                 'end' => config('hris.work_end'),
@@ -48,9 +49,7 @@ class AttendanceController extends Controller
             $this->fail('date', 'Hari ini bukan hari kerja.');
         }
 
-        $lat = $request->float('latitude');
-        $lng = $request->float('longitude');
-        $location = $this->checkLocation($lat, $lng);
+        [$lat, $lng, $location] = $this->resolveLocation($request);
 
         $lateAfter = $now->copy()
             ->setTimeFromTimeString(config('hris.work_start'))
@@ -98,9 +97,7 @@ class AttendanceController extends Controller
             $this->fail('attendance', 'Kamu sudah clock out hari ini.');
         }
 
-        $lat = $request->float('latitude');
-        $lng = $request->float('longitude');
-        $location = $this->checkLocation($lat, $lng);
+        [$lat, $lng, $location] = $this->resolveLocation($request);
 
         // whereNull('clock_out') bikin update ini atomik: klik ganda tidak menimpa data
         $updated = Attendance::whereKey($attendance->id)
@@ -164,6 +161,30 @@ class AttendanceController extends Controller
     private function isWorkingDay(Carbon $date): bool
     {
         return in_array($date->isoWeekday(), config('hris.work_days'), true);
+    }
+
+    private function requiresLocation(): bool
+    {
+        return (bool) config('hris.attendance.require_location');
+    }
+
+    /**
+     * Menentukan koordinat yang disimpan dan info kantor untuk balasan.
+     * Lokasi tidak wajib: tidak ada yang divalidasi dan tidak ada koordinat yang disimpan,
+     * walaupun klien tetap mengirimnya.
+     *
+     * @return array{0: float|null, 1: float|null, 2: array<string, mixed>|null}
+     */
+    private function resolveLocation(ClockRequest $request): array
+    {
+        if (! $this->requiresLocation()) {
+            return [null, null, null];
+        }
+
+        $lat = $request->float('latitude');
+        $lng = $request->float('longitude');
+
+        return [$lat, $lng, $this->checkLocation($lat, $lng)];
     }
 
     /**
