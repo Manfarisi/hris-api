@@ -6,8 +6,6 @@ Backend sistem HRIS (Human Resource Information System) untuk perusahaan skala k
 absensi berbasis lokasi, cuti dengan approval bertingkat, dan payroll lengkap dengan slip gaji PDF.
 Dibuat dengan Laravel 12 sebagai REST API, dilengkapi feature test dan dokumentasi OpenAPI otomatis.
 
-> **Demo live:** _(isi setelah deploy)_ · **Frontend:** _(repo hris-web, menyusul)_
-
 ## Fitur
 
 - **Autentikasi & role**: token Sanctum, 4 role (Super Admin, HR, Manager, Karyawan), akses dicek lewat Middleware dan Policy.
