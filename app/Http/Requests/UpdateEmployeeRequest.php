@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class UpdateEmployeeRequest extends FormRequest
 {
@@ -36,5 +37,32 @@ class UpdateEmployeeRequest extends FormRequest
                 Rule::in([User::ROLE_HR, User::ROLE_MANAGER, User::ROLE_EMPLOYEE]),
             ],
         ];
+    }
+
+    /**
+     * Pengaman akun sendiri: tidak boleh menonaktifkan atau menurunkan role akun yang
+     * sedang dipakai login. Aturan yang sama sudah ada di DELETE /employees/{id}.
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            $employee = $this->route('employee');
+            $me = $this->user();
+
+            $isSelf = $employee->user_id !== null && (int) $employee->user_id === (int) $me->id;
+
+            if (! $isSelf) {
+                return;
+            }
+
+            if ($this->input('status') === 'inactive') {
+                $validator->errors()->add('status', 'Kamu tidak bisa menonaktifkan akun sendiri.');
+            }
+
+            // Mengirim role yang sama dengan sekarang tetap boleh (form edit selalu mengirimnya)
+            if ($this->has('role') && $this->input('role') !== $me->role) {
+                $validator->errors()->add('role', 'Kamu tidak bisa mengubah role akunmu sendiri.');
+            }
+        });
     }
 }
