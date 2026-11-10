@@ -1,5 +1,7 @@
 # HRIS API
 
+![Tests](https://github.com/Manfarisi/hris-api/actions/workflows/tests.yml/badge.svg)
+
 Backend sistem HRIS (Human Resource Information System) untuk perusahaan skala kecil-menengah:
 absensi berbasis lokasi, cuti dengan approval bertingkat, dan payroll lengkap dengan slip gaji PDF.
 Dibuat dengan Laravel 12 sebagai REST API, dilengkapi feature test dan dokumentasi OpenAPI otomatis.
